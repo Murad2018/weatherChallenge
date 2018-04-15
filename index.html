@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Weather2</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-md-7 blurred-bg">
+				
+				<table id="table" class="table text-center table-hover table-striped blurred-bg table-condensed">
+					<thead>
+						<tr>
+							<th>Weekdays</th>
+							<th>Temperature</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>		
+					</tbody>
+				</table>
+				
+			</div>
+			<div class="col-md-4">
+				<table id="table2" class="table text-center table-condensed">
+					<thead>
+						<tr>
+							<th class="thead-dark">More Info</th>							
+						</tr>
+					</thead>
+					<tbody>												
+					</tbody>
+				</table>
+			</div>
+			
+		</div>
+		
+	</div>
+	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+
+	<script type="text/javascript">
+		var url = "https://api.openweathermap.org/data/2.5/forecast/daily?";
+		var lat = "";
+		var lon = "";
+		var appIdKey = "&APPID=9fd7a449d055dba26a982a3220f32aa2";
+		var units = "&units=metric";
+		var fullApiUrl= "";
+
+		$(document).ready(function(){
+
+
+			//$("#table2").hide();
+
+			navigator.geolocation.getCurrentPosition(function(position) {
+				lat = "&lat="+ position.coords.latitude;
+				lon = "&lon=" + position.coords.longitude;
+				console.log(lat,lon);
+			 	var fullApiUrl = url + lat + lon + appIdKey + units;
+				console.log(fullApiUrl);	
+
+			function timeConverter(dateFromOpenWeather){
+				
+			  var a = new Date(dateFromOpenWeather * 1000);
+			  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+			  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+			  var dayOfWeek = days[a.getDay()];
+			  var year = a.getFullYear();
+			  var month = months[a.getMonth()];
+			  var date = a.getDate();
+			  console.log(date);				  
+			  var time = dayOfWeek +"<br/>"+ date + ' ' + month + ' ' + year;
+			  return time;
+			}	
+
+			$.get(fullApiUrl, function(data, status){
+
+				var list = data.list;
+				for (var i = 0; i < list.length; i++) {
+
+					var dates = timeConverter(data.list[i].dt);
+					console.log(dates);
+					var flooredTemp = Math.round(data.list[i].temp.day);
+					console.log(flooredTemp);
+					var urlImg = "http://openweathermap.org/img/w/" + data.list[i].weather[0].icon + ".png";
+					console.log(urlImg);
+					var img = "<img src="+ urlImg + ' height="70px" width="70px"/>';
+					console.log(img);				
+
+					$("#table").append("<tr><td>"+ dates + "</td><td>"+ flooredTemp + " C°   " + img + "</td></tr>");				
+				}
+
+				var indexRow = $("#table tr").index(); 	
+
+				var imgNight = '<img src="http://openweathermap.org/img/w/04n.png" height="70px" width="70px"/>';
+				var windT = '<img src="wind.png" height="50px" width="50px"/>';
+				var humidityIcon = '<img src="humidity.png" height="40px" width="30px"/>';
+				$("#table tr").click(function(){
+			      var row_index = $(this).index();
+				$("#table2").hide().delay(100).fadeIn(1000);
+			      for (var i = 0; i < list.length; i++) {			      	
+			      	if(row_index==i){	      			      				      		
+			      		$("#table2>tbody").html(
+			      			"<tr><td><b>Location:</b><br /> " + data.city.name +", " + data.city.country + "</td></tr><tr><td><b>Day:</b><br /> " + data.list[i].temp.day + " C°"+ " &nbsp; "+ img  +"</td></tr><tr><td><b>Night:</b><br /> " + data.list[i].temp.night + " C°"+ " &nbsp; "+ imgNight + "</td></tr><tr><td><b>Humidity:</b><br /> " + data.list[i].humidity + " &nbsp; "+humidityIcon + "</td></tr><tr><td><b>Wind Speed:</b><br /> " + data.list[i].speed + " &nbsp;  " + windT + "</td></tr><tr><td><b>Description:</b><br /> " + data.list[i].weather[0].description + "</td></tr>");
+			      		
+
+			      		break;		      			
+			      								 
+
+			      	}
+			      }
+
+			      		
+				});				
+
+				});
+
+			});
+		});		
+	</script>
+
+</body>
+</html>
